@@ -183,7 +183,7 @@ private:
     // it will release mCore->mMutex while blocked so that other operations on
     // the BufferQueue may succeed.
     status_t waitForFreeSlotThenRelock(const char* caller, bool async,
-            int* found, status_t* returnFlags) const;
+            int* found, status_t* returnFlags, uint32_t usage) const;
 
     sp<BufferQueueCore> mCore;
 

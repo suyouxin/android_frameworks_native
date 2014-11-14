@@ -18,7 +18,7 @@
 
 #define LOG_TAG "BufferQueueProducer"
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 #define EGL_EGLEXT_PROTOTYPES
 
@@ -69,6 +69,8 @@ status_t BufferQueueProducer::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
 
 status_t BufferQueueProducer::setBufferCount(int bufferCount) {
     ATRACE_CALL();
+	// Fix me, temp hack here, allow application dequeue buffer up to 6
+    bufferCount = 6;
     BQ_LOGV("setBufferCount: count = %d", bufferCount);
 
     sp<IConsumerListener> listener;
@@ -127,7 +129,7 @@ status_t BufferQueueProducer::setBufferCount(int bufferCount) {
 }
 
 status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
-        bool async, int* found, status_t* returnFlags) const {
+        bool async, int* found, status_t* returnFlags, uint32_t usage) const {
     bool tryAgain = true;
     while (tryAgain) {
         if (mCore->mIsAbandoned) {
@@ -160,6 +162,7 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
         *found = BufferQueueCore::INVALID_BUFFER_SLOT;
         int dequeuedCount = 0;
         int acquiredCount = 0;
+		// int freeCount = 0;
         for (int s = 0; s < maxBufferCount; ++s) {
             switch (mSlots[s].mBufferState) {
                 case BufferSlot::DEQUEUED:
@@ -176,12 +179,19 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
                             mSlots[s].mFrameNumber < mSlots[*found].mFrameNumber) {
                         *found = s;
                     }
+					// freeCount++;
                     break;
                 default:
                     break;
             }
         }
 
+		//we would alloc 4 buffers and set usage to GRALLOC_USAGE_PRIVATE_3
+        //under bypass mode.
+        // if((usage & GRALLOC_USAGE_PRIVATE_3) &&
+            // maxBufferCount == 4 && freeCount < 2) {
+                // return -EBUSY;
+        // }
         // Producers are not allowed to dequeue more than one buffer if they
         // did not set a buffer count
         if (!mCore->mOverrideMaxBufferCount && dequeuedCount) {
@@ -278,7 +288,7 @@ status_t BufferQueueProducer::dequeueBuffer(int *outSlot,
 
         int found;
         status_t status = waitForFreeSlotThenRelock("dequeueBuffer", async,
-                &found, &returnFlags);
+                &found, &returnFlags, usage);
         if (status != NO_ERROR) {
             return status;
         }
@@ -479,7 +489,7 @@ status_t BufferQueueProducer::attachBuffer(int* outSlot,
     // unlikely that buffers which we are attaching to a BufferQueue will
     // be asynchronous (droppable), but it may not be impossible.
     status_t status = waitForFreeSlotThenRelock("attachBuffer(P)", false,
-            &found, &returnFlags);
+            &found, &returnFlags, 0);
     if (status != NO_ERROR) {
         return status;
     }
