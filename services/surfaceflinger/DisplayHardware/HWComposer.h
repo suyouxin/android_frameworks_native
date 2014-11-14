@@ -255,6 +255,7 @@ public:
         uint32_t height;
         float xdpi;
         float ydpi;
+        uint32_t format;
         nsecs_t refresh;
     };
 
@@ -276,6 +277,7 @@ public:
     const Vector<DisplayConfig>& getConfigs(int disp) const;
     size_t getCurrentConfig(int disp) const;
 
+    void setEglSurface(int disp, void* dpy, void* surface);
     status_t setVirtualDisplayProperties(int32_t id, uint32_t w, uint32_t h,
             uint32_t format);
 

@@ -87,6 +87,7 @@ protected:
 
 private:
     status_t mapfd(int fd, size_t size, uint32_t offset = 0);
+    status_t mapion(int fd, size_t size, uint32_t offset = 0);
 
     int         mFD;
     size_t      mSize;
@@ -95,6 +96,12 @@ private:
     const char* mDevice;
     bool        mNeedUnmap;
     uint32_t    mOffset;
+
+    /*
+     * ashmem's mFD points to heap ID & ashmem's mDevFd is -1
+     * ION's mFD points to heap ID & ION's mDevFd points to device node
+     */
+    int         mDevFd;
 };
 
 // ---------------------------------------------------------------------------
