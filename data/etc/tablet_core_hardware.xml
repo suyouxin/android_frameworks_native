@@ -28,7 +28,6 @@
     <feature name="android.hardware.location.network" />
     <feature name="android.hardware.sensor.compass" />
     <feature name="android.hardware.sensor.accelerometer" />
-    <feature name="android.hardware.bluetooth" />
     <feature name="android.hardware.touchscreen" />
     <feature name="android.hardware.touchscreen.multitouch" />
     <feature name="android.hardware.touchscreen.multitouch.distinct" />
@@ -36,6 +35,7 @@
     <feature name="android.hardware.screen.portrait" />
     <feature name="android.hardware.screen.landscape" />
 
+    <!-- <feature name="android.hardware.bluetooth" /> -->
     <!-- basic system services -->
     <feature name="android.software.app_widgets" />
     <feature name="android.software.voice_recognizers" />
