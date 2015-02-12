@@ -70,7 +70,7 @@ status_t BufferQueueProducer::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
 status_t BufferQueueProducer::setBufferCount(int bufferCount) {
     ATRACE_CALL();
 	// Fix me, temp hack here, allow application dequeue buffer up to 6
-    bufferCount = 6;
+    // bufferCount = 6;
     BQ_LOGV("setBufferCount: count = %d", bufferCount);
 
     sp<IConsumerListener> listener;
@@ -162,7 +162,6 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
         *found = BufferQueueCore::INVALID_BUFFER_SLOT;
         int dequeuedCount = 0;
         int acquiredCount = 0;
-		// int freeCount = 0;
         for (int s = 0; s < maxBufferCount; ++s) {
             switch (mSlots[s].mBufferState) {
                 case BufferSlot::DEQUEUED:
@@ -179,19 +178,12 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
                             mSlots[s].mFrameNumber < mSlots[*found].mFrameNumber) {
                         *found = s;
                     }
-					// freeCount++;
                     break;
                 default:
                     break;
             }
         }
 
-		//we would alloc 4 buffers and set usage to GRALLOC_USAGE_PRIVATE_3
-        //under bypass mode.
-        // if((usage & GRALLOC_USAGE_PRIVATE_3) &&
-            // maxBufferCount == 4 && freeCount < 2) {
-                // return -EBUSY;
-        // }
         // Producers are not allowed to dequeue more than one buffer if they
         // did not set a buffer count
         if (!mCore->mOverrideMaxBufferCount && dequeuedCount) {
@@ -215,7 +207,7 @@ status_t BufferQueueProducer::waitForFreeSlotThenRelock(const char* caller,
                         "(dequeued=%d undequeued=%d)",
                         caller, minUndequeuedCount,
                         dequeuedCount, newUndequeuedCount);
-                return INVALID_OPERATION;
+                // return INVALID_OPERATION;
             }
         }
 
@@ -923,7 +915,6 @@ void BufferQueueProducer::allocateBuffers(bool async, uint32_t width,
             allocHeight = height > 0 ? height : mCore->mDefaultHeight;
             allocFormat = format != 0 ? format : mCore->mDefaultBufferFormat;
             allocUsage = usage | mCore->mConsumerUsageBits;
-
             mCore->mIsAllocating = true;
         } // Autolock scope
 
@@ -971,7 +962,8 @@ void BufferQueueProducer::allocateBuffers(bool async, uint32_t width,
                 mSlots[slot].mGraphicBuffer = buffers[i];
                 mSlots[slot].mFrameNumber = 0;
                 mSlots[slot].mFence = Fence::NO_FENCE;
-                BQ_LOGV("allocateBuffers: allocated a new buffer in slot %d", slot);
+                BQ_LOGV("allocateBuffers: allocated a new buffer in slot %d, format: %d", slot, 
+					mSlots[slot].mGraphicBuffer->getPixelFormat());
             }
 
             mCore->mIsAllocating = false;
